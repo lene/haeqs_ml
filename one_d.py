@@ -1,5 +1,6 @@
 from __future__ import print_function
 from math import sqrt
+import sys
 
 # to use matplotlib to plot values:
 # sudo apt install python3-tk
@@ -11,6 +12,7 @@ y = [1, 3, 3, 2, 5]  # example values
 
 plt.plot(y)
 # plt.show()
+sys.exit()
 
 
 def mean(numbers):
@@ -33,6 +35,7 @@ def coefficients(x, y):
 
 
 coeffs = coefficients(x, y)
+print()
 print("Coefficients: {}\ny = {}*x + {}".format(coeffs, coeffs[0], coeffs[1]))
 
 
@@ -41,10 +44,17 @@ def prediction(training_x, training_y, x):
     return b0 + b1 * x
 
 
+print()
 print("Prediction for x = 1: {}".format(prediction(x, y, 1)))
 print("Actual value for x = 1: {}".format(y[0]))
 print("Prediction for x = 2: {}".format(prediction(x, y, 2)))
 print("Actual value for x = 2: {}".format(y[1]))
+# ...
+print("Prediction for x = 5: {}".format(prediction(x, y, 5)))
+print("Actual value for x = 5: {}".format(y[4]))
+
+plt.plot([prediction(x, y, xx) for xx in range(1, 6)])
+# plt.show()
 
 
 def simple_linear_regression(train_x, train_y, test_x):
@@ -74,6 +84,35 @@ def evaluate_algorithm(dataset, algorithm):
 
 
 predicted, test_set = test_on_test_set(simple_linear_regression, (x, y))
+print()
 print("Values:", test_set, "Prediction:", predicted)
-
 print("Error:", evaluate_algorithm((x, y), simple_linear_regression))
+
+
+def load_csv(filename):
+    from csv import reader
+    x, y = [], []
+    with open(filename, 'r') as file:
+        csv_reader = reader(file)
+        for row in csv_reader:
+            if not row:
+                continue
+            if not row[0].isdigit():
+                continue
+            if not int(row[0]):
+                continue
+            x.append(int(row[0]))
+            y.append(float(row[1]))
+    return x, y
+
+x, y = load_csv('Demographic_Statistics_By_Zip_Code.csv')
+print(x, y)
+plt.clf()
+plt.plot(x, y, 'ro')
+# plt.show()
+coeffs = coefficients(x, y)
+print("Coefficients: {}\ny = {}*x + {}".format(coeffs, coeffs[0], coeffs[1]))
+print("Error:", evaluate_algorithm((x, y), simple_linear_regression))
+
+plt.plot([prediction(x, y, xx) for xx in range(0, 250)])
+# plt.show()
