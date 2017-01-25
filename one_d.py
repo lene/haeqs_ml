@@ -10,8 +10,8 @@ import matplotlib.pyplot as plt
 x = [1, 2, 3, 4, 5]  # example values for x
 y = [1, 3, 3, 2, 5]  # example values
 
-plt.plot(y)
-# plt.show()
+plt.plot(y, 'ro')
+plt.show()
 sys.exit()
 
 
