@@ -13,7 +13,7 @@ house_data['sqm_living'] = house_data['sqft_living']*0.092903
 
 prices = house_data['price']
 features = house_data[['sqm_living']]
-classifier = Classifier()
+classifier = Classifier(alpha=0)
 classifier.fit(features, prices)
 print('100 sqm', classifier.predict(100))
 print('100 sqm', classifier.predict(200))
@@ -25,14 +25,14 @@ print(house_data[:10])
 print(house_data.keys())
 
 features = house_data[['sqm_living', 'bedrooms']]
-classifier = Classifier()
+classifier = Classifier(alpha=0)
 classifier.fit(features, prices)
 print('100 sqm, 1 bedroom', classifier.predict([[100, 1]]))
 print('200 sqm, 2 bedrooms', classifier.predict([[200, 2]]))
 
 
 features = house_data[['sqm_living', 'bedrooms', 'waterfront']]
-classifier = Classifier()
+classifier = Classifier(alpha=0)
 classifier.fit(features, prices)
 print('boring ass house', classifier.predict([[200, 2, 0]]))
 print('house at water', classifier.predict([[200, 2, 1]]))
