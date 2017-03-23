@@ -116,15 +116,6 @@ class MNISTDataSets(DataSets):
         """
         return read_images_from_urls(MNISTGraph.IMAGE_SIZE, MNISTGraph.IMAGE_SIZE, 1, *urls)
 
-    @classmethod
-    def to_image_data(cls, dataset):
-        return dataset.reshape(28, 28)
-        lines = numpy.array((28, 28), dtype=float)
-        for y in range(0, MNISTGraph.IMAGE_SIZE):
-            for x in range(0, MNISTGraph.IMAGE_SIZE):
-                lines[y][x] = dataset[y*MNISTGraph.IMAGE_SIZE+x]
-        return lines
-
     ############################################################################
 
     def _get_extracted_data(self, file_name, extract_function):

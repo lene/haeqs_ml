@@ -23,15 +23,32 @@ print('test set loss:', loss_and_metrics[0], 'test set accuracy:', loss_and_metr
 import matplotlib.pyplot as plt
 
 
+def show_image(grayscale_values):
+    plt.imshow(to_image_data(grayscale_values), cmap='gray')
+    plt.show()
+
+
+def to_image_data(dataset):
+    return dataset.reshape(28, 28)
+
+
 def maxindex(l):
     max_value = max(l)
     return list(l).index(max_value)
 
 
+def nth_index_and_value(l, n):
+    s = sorted(l)
+    v = s[-n]
+    i = list(l).index(v)
+    return i, v
+
+
 for i in range(0, 10):
-    print('expected:', maxindex(data.test.labels[i]), data.test.labels[i])
-    plt.imshow(MNISTDataSets.to_image_data(data.test.input[i]), cmap='gray')
-    plt.show()
-    print('predicted:', maxindex(mnist.predict(data.test.input[i:i+1])[0]), mnist.predict(data.test.input[i:i+1])[0])
+    show_image(data.test.input[i])
 
+    actual = data.test.labels[i]
+    print('actual:', maxindex(actual), actual)
 
+    prediction = mnist.predict(data.test.input[i:i + 1])[0]
+    print('predicted:', maxindex(prediction), nth_index_and_value(prediction, 1), 'runner up:', nth_index_and_value(prediction, 2))
