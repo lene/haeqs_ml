@@ -7,7 +7,7 @@ __author__ = 'Lene Preuss <lene.preuss@gmail.com>'
 
 class ImagesLabelsDataSet(DataSetBase):
 
-    def __init__(self, images, labels):
+    def __init__(self, images, labels, depth=1):
         """Construct a DataSet.
 
         Args:
@@ -21,7 +21,7 @@ class ImagesLabelsDataSet(DataSetBase):
 
         # Convert shape from [num examples, rows, columns, depth] to [num examples, rows*columns]
         # TODO: assumes depth == 1
-        images = images.reshape(images.shape[0], images.shape[1] * images.shape[2])
+        images = images.reshape(images.shape[0], depth * images.shape[1] * images.shape[2])
         images = normalize(images)
 
         self._input = images
@@ -48,6 +48,7 @@ def invert(ndarray):
 
 def _check_constructor_arguments_valid(images, labels):
     assert len(images.shape) == 4, \
-        'images must have 4 dimensions: number of images, image height, image width, color depth'
-    assert images.shape[3] == 1, 'image depth must be 1'
+        'images must have 4 dimensions: number of images, image height, image width, color depth.' \
+        'Actual shape: {}'.format(images.shape)
+    # assert images.shape[3] == 1, 'image depth must be 1'
 

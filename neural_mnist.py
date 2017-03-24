@@ -3,27 +3,22 @@ from keras.models import Sequential
 
 from data_sets.mnist_data_sets import MNISTDataSets
 
+data = MNISTDataSets('./data', True)
+
 mnist = Sequential([
-    Dense(32, input_dim=784), Activation('relu'),
-    Dense(10), Activation('softmax'),
+    Dense(32, input_dim=data.num_features), Activation('relu'),
+    Dense(data.num_labels), Activation('softmax'),
 ])
 
 mnist.compile(
     optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy']
 )
 
-data = MNISTDataSets('./data', True)
-
 mnist.fit(data.train.input, data.train.labels)
-
-loss_and_metrics = mnist.evaluate(data.test.input, data.test.labels)
-print()
-print('test set loss:', loss_and_metrics[0], 'test set accuracy:', loss_and_metrics[1])
-
-import matplotlib.pyplot as plt
 
 
 def show_image(grayscale_values):
+    import matplotlib.pyplot as plt
     plt.imshow(to_image_data(grayscale_values), cmap='gray')
     plt.show()
 

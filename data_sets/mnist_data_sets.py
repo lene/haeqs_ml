@@ -13,10 +13,6 @@ __author__ = 'Lene Preuss <lene.preuss@gmail.com>'
 """DataSets for MNIST data."""
 
 
-class MNISTGraph:
-    IMAGE_SIZE = 28
-
-
 class MNISTDataSets(DataSets):
 
     """Data sets (training, validation and test data) containing the MNIST data.
@@ -25,6 +21,7 @@ class MNISTDataSets(DataSets):
     handwritten numbers from 0 to 9.
     """
 
+    IMAGE_SIZE = 28
     SOURCE_URL = 'http://yann.lecun.com/exdb/mnist/'
     TRAIN_IMAGES = 'train-images-idx3-ubyte.gz'
     TRAIN_LABELS = 'train-labels-idx1-ubyte.gz'
@@ -42,6 +39,8 @@ class MNISTDataSets(DataSets):
         """
         self.train_dir = train_dir
         self.one_hot = one_hot
+        self.num_features = self.IMAGE_SIZE*self.IMAGE_SIZE
+        self.num_labels = 10
 
         train_images = self._get_extracted_data(self.TRAIN_IMAGES, self._extract_images)
         train_labels = self._get_extracted_data(self.TRAIN_LABELS, self._extract_labels)
