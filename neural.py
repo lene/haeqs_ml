@@ -1,7 +1,7 @@
-from keras.models import Sequential
 from keras.layers import Dense, Activation
+from keras.models import Sequential
 
-from mnist_data_sets import MNISTDataSets
+from data_sets.mnist_data_sets import MNISTDataSets
 
 mnist = Sequential([
     Dense(32, input_dim=784), Activation('relu'),

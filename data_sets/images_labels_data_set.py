@@ -1,6 +1,6 @@
-from data_set_base import DataSetBase
-
 import numpy
+
+from data_sets.data_set_base import DataSetBase
 
 __author__ = 'Lene Preuss <lene.preuss@gmail.com>'
 

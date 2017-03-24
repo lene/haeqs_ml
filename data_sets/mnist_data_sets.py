@@ -1,13 +1,12 @@
-from data_sets import DataSets
-from images_labels_data_set import ImagesLabelsDataSet
-from input_data import maybe_download, images_from_bytestream, \
+import gzip
+
+import numpy
+from .input_data import maybe_download, images_from_bytestream, \
     read_one_image_from_file, read_one_image_from_url, read_images_from_file, read_images_from_url, \
     read_images_from_files, read_images_from_urls
 
-import numpy
-
-import gzip
-
+from .data_sets import DataSets
+from data_sets.images_labels_data_set import ImagesLabelsDataSet
 
 __author__ = 'Lene Preuss <lene.preuss@gmail.com>'
 
