@@ -61,62 +61,7 @@ class ImageFileDataSets(DataSets):
     def get_label(self, number):
         return self.numbers_to_labels[number]
 
-    @classmethod
-    def read_one_image_from_file(cls, filename):
-        raise NotImplementedError()
-
-    @classmethod
-    def read_one_image_from_url(cls, url):
-        """Reads one MNIST image from a URL.
-
-        :param url: The URL containing the image data.
-        :return: A numpy.ndarray of shape <1, 28, 28, 1>
-        """
-        raise NotImplementedError()
-
-    @classmethod
-    def read_images_from_file(cls, filename, num_images):
-        """Reads multiple MNIST images from a single file.
-
-        :param filename: The file containing the image data.
-        :param num_images: Number of images to read.
-        :return: A numpy.ndarray of shape <num_images, 28, 28, 1>
-        """
-        raise NotImplementedError()
-
-    @classmethod
-    def read_images_from_url(cls, url, num_images):
-        """Reads multiple MNIST images from a single URL.
-
-        :param url: The URL containing the image data.
-        :param num_images: Number of images to read.
-        :return: A numpy.ndarray of shape <num_images, 28, 28, 1>
-        """
-        raise NotImplementedError()
-
-    @classmethod
-    def read_images_from_files(cls, *filenames):
-        """Reads multiple MNIST images from a list of files.
-
-        :param filenames: The files containing the image data.
-        :return: A numpy.ndarray of shape <num_images, 28, 28, 1>
-        """
-        raise NotImplementedError()
-
-    @classmethod
-    def read_images_from_urls(cls, *urls):
-        """Reads multiple MNIST images from a list of URLs.
-
-        :param urls: The URLs containing the image data.
-        :return: A numpy.ndarray of shape <num_images, 28, 28, 1>
-        """
-        raise NotImplementedError()
-
     ############################################################################
-
-    def _get_extracted_data(self, file_name, extract_function):
-        local_file = maybe_download(file_name, self.SOURCE_URL, self.train_dir)
-        return extract_function(local_file, one_hot=self.one_hot)
 
     def _extract_images(self, base_dir):
         """Extract the images into a 4D uint8 numpy array [index, y, x, depth]."""
@@ -126,9 +71,9 @@ class ImageFileDataSets(DataSets):
         all_dirs = list(walk(base_dir))
         i = 0
         for root, dirs, files in all_dirs:
-            print(root, "%.2f%%" % (i/len(all_dirs)*100))
-            i += 1
             label = root.split('/')[-1]
+            print(label, "%.2f%%" % (i/len(all_dirs)*100))
+            i += 1
             for file in files:
                 try:
                     image = Image.open(os.path.join(root, file)).convert('RGB')

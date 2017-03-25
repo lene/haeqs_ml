@@ -26,6 +26,8 @@ class ImagesLabelsDataSet(DataSetBase):
 
         self._input = images
 
+    def __len__(self):
+        return self._input.shape(0)
 
 def normalize(ndarray):
     """Transform a ndarray that contains uint8 values to floats between 0. and 1.
