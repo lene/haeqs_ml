@@ -1,11 +1,7 @@
-import gzip
 from os import walk
 from PIL import Image
 
 import numpy
-from .input_data import maybe_download, images_from_bytestream, \
-    read_one_image_from_file, read_one_image_from_url, read_images_from_file, read_images_from_url, \
-    read_images_from_files, read_images_from_urls
 
 from .data_sets import DataSets
 from data_sets.images_labels_data_set import ImagesLabelsDataSet
@@ -20,24 +16,18 @@ class ImageFileDataSets(DataSets):
     """Data sets (training, validation and test data) containing RGB image files."""
     DEFAULT_VALIDATION_SHARE = 0.2
 
-    def __init__(self, base_dir, x_size, y_size, train_dir, validation_share=None, one_hot=False):
+    def __init__(self, base_dir, x_size, y_size, validation_share=None, one_hot=False):
         """Construct the data set, locating and if necessarily downloading the MNIST data.
 
         :param train_dir: Where to store the MNIST data files.
         :param one_hot:
         """
-        self.train_dir = train_dir
         self.one_hot = one_hot
         self.base_dir = base_dir
         self.size = (x_size, y_size)
         self.num_features = x_size*y_size*3
 
         all_images, all_labels = self._extract_images(base_dir)
-
-        if False:
-            for i, image in enumerate(all_images):
-                # self.show_image(image, all_labels[i])
-                print(image)
 
         self.num_labels = len(set(all_labels))
         if one_hot:
@@ -59,7 +49,10 @@ class ImageFileDataSets(DataSets):
         )
 
     def get_label(self, number):
-        return self.numbers_to_labels[number]
+        try:
+            return self.numbers_to_labels[number]
+        except KeyError:
+            raise KeyError('{} not in {}'.format(number, self.numbers_to_labels))
 
     ############################################################################
 
@@ -93,7 +86,8 @@ class ImageFileDataSets(DataSets):
             image = image.crop((0, 0, w, w))
         return image.resize(self.size, Image.BICUBIC)
 
-    def show_image(self, rgb_values, label=''):
+    @staticmethod
+    def show_image(rgb_values, label=''):
         import matplotlib.pyplot as plt
         plt.imshow(rgb_values, cmap='gray')
         plt.title(label)
@@ -107,6 +101,10 @@ class ImageFileDataSets(DataSets):
         images[:], labels[:] = zip(*combined)
         return images[test_size:], labels[test_size:], images[:test_size], labels[:test_size]
 
+    def prediction_info(self, prediction, place):
+        index, value = nth_index_and_value(prediction, place)
+        label = self.get_label(index)
+        return index, label, value
 
 def _dense_to_one_hot(labels_dense):
     """Convert class labels from scalars to one-hot vectors."""
@@ -121,3 +119,7 @@ def _dense_to_one_hot(labels_dense):
     return labels_one_hot, labels_to_numbers
 
 
+def nth_index_and_value(l, n):
+    v = sorted(l)[-n]
+    i = list(l).index(v)
+    return i, v
