@@ -1,4 +1,5 @@
 from os.path import isfile
+from subprocess import call
 from pickle import dump, load
 from gzip import open as gzopen
 from argparse import ArgumentParser
@@ -20,8 +21,14 @@ def get_data(args):
             return load(file)
     else:
         data = ImageFileDataSets(args.image_directory, args.image_size, args.image_size, 0, True)
-        with gzopen(args.data_file, 'wb') as file:
-            dump(data, file)
+        try:
+            with gzopen(args.data_file, 'wb') as file:
+                dump(data, file)
+        except OverflowError:   # annoying python bug when using gzopen with data > 4GB
+            uncompressed_file = '.'.join(args.data_file.split('.')[:-1])
+            with open(uncompressed_file, 'wb') as file:
+                dump(data, file)
+            call(('gzip', uncompressed_file))
         return data
 
 
@@ -62,7 +69,7 @@ def parse_args():
         help='Size (both width and height) to which images are resized.'
     )
     parser.add_argument(
-        '--no-run-test', action='store_false',
+        '--run-test', action='store_true',
         help='Evaluate performance of the model on the test set.'
     )
     parser.add_argument(
@@ -92,7 +99,7 @@ if args.num_epochs > 0:
     model.fit(train, data.train.labels, epochs=args.num_epochs)
     model.save_weights(args.weights_file)
 
-if not args.no_run_test:
+if args.run_test:
     test = data.test.input.reshape(len(data.test.input), args.image_size, args.image_size, 3)
     loss_and_metrics = model.evaluate(test, data.test.labels)
     print()
