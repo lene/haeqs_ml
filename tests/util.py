@@ -1,8 +1,5 @@
-from nn_wtf.images_labels_data_set import DataSetBase
-from nn_wtf.data_sets import DataSets
-from nn_wtf.neural_network_graph import NeuralNetworkGraph
-
-import tensorflow as tf
+from data_sets.images_labels_data_set import DataSetBase
+from data_sets.data_sets import DataSets
 
 import numpy
 
@@ -20,7 +17,7 @@ def create_minimal_input_placeholder():
 
 def get_project_root_folder():
     import os
-    return os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    return os.path.dirname(os.path.dirname(__file__))
 
 
 def create_train_data_set():
