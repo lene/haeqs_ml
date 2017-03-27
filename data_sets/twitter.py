@@ -1,4 +1,5 @@
 """Just some example code for getting images via the twitter API"""
+
 import twitter
 import json
 
@@ -8,7 +9,8 @@ def to_date(created_at):
     datetime = dateutil.parser.parse(created_at)
     return "{:%Y-%m-%d}".format(datetime)
 
-
+# for docs how to generate your own authentication file, see:
+# https://python-twitter.readthedocs.io/en/latest/getting_started.html
 with open('twitter_auth.json', 'r') as auth_file:
     auth = json.load(auth_file)
 
