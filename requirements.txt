@@ -3,3 +3,4 @@ tensorflow
 h5py
 pillow
 matplotlib
+python-twitter
