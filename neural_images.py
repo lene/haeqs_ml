@@ -1,7 +1,4 @@
 from os.path import isfile
-from subprocess import call
-from pickle import dump, load
-from gzip import open as gzopen
 from argparse import ArgumentParser
 from random import choice
 
@@ -14,30 +11,34 @@ PICKLE_FILE = 'images.{}.pickle.gz'.format(SIZE)
 WEIGHTS_FILE = 'images.{}.hdf5'.format(SIZE)
 
 
-def get_data(args):
-    if isfile(args.data_file):
-        print('Loading ' + args.data_file)
-        with gzopen(args.data_file, 'rb') as file:
-            return load(file)
-    else:
-        data = ImageFileDataSets(args.image_directory, args.image_size, args.image_size, 0, True)
-        try:
-            with gzopen(args.data_file, 'wb') as file:
-                dump(data, file)
-        except OverflowError:   # annoying python bug when using gzopen with data > 4GB
-            uncompressed_file = '.'.join(args.data_file.split('.')[:-1])
-            with open(uncompressed_file, 'wb') as file:
-                dump(data, file)
-            call(('gzip', uncompressed_file))
-        return data
-
-
 def maxindex(l):
     return nth_index_and_value(l, 1)[0]
 
 
 def show_image(image, depth):
     data.show_image(image.reshape(*data.size, depth))
+
+
+def show_demo(num_demo_images):
+    for i in range(0, num_demo_images):
+
+        if args.random_demo_images:
+            image_index = choice(range(len(data.test.input)))
+        else:
+            image_index = i
+
+        show_image(data.test.input[image_index], 3)
+
+        actual = data.test.labels[image_index]
+        print('actual:', maxindex(actual), data.get_label(maxindex(actual)))
+
+        input = data.test.input[image_index:image_index + 1].reshape(
+            1, args.image_size, args.image_size, 3
+        )
+
+        for prediction in model.predict(input):
+            print('predicted:', *data.prediction_info(prediction, 1))
+            print('runner up:', *data.prediction_info(prediction, 2))
 
 
 def parse_args():
@@ -83,9 +84,10 @@ def parse_args():
     return parser.parse_args()
 
 args = parse_args()
-data = get_data(args)
 
-model = InceptionV3(weights=None, include_top=True, input_shape=(args.image_size, args.image_size, 3), classes=data.num_labels)
+data = ImageFileDataSets.get_data(args.data_file, args.image_directory, args.image_size)
+
+model = InceptionV3(weights=None, input_shape=(*data.size, data.depth), classes=data.num_labels)
 
 model.compile(loss="categorical_crossentropy", optimizer=args.optimizer, metrics=['accuracy'])
 
@@ -106,22 +108,5 @@ if args.run_test:
     print('test set loss:', loss_and_metrics[0], 'test set accuracy:', loss_and_metrics[1])
 
 
-for i in range(0, args.num_demo_images):
-
-    if args.random_demo_images:
-        image_index = choice(range(len(data.test.input)))
-    else:
-        image_index = i
-
-    show_image(data.test.input[image_index], 3)
-
-    actual = data.test.labels[image_index]
-    print('actual:', maxindex(actual), data.get_label(maxindex(actual)))
-
-    input = data.test.input[image_index:image_index + 1].reshape(
-        1, args.image_size, args.image_size, 3
-    )
-
-    for prediction in model.predict(input):
-        print('predicted:', *data.prediction_info(prediction, 1))
-        print('runner up:', *data.prediction_info(prediction, 2))
+if args.num_demo_images:
+    show_demo(args.num_demo_images)

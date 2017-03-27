@@ -65,7 +65,7 @@ class MNISTDataSets(DataSets):
         :param filename: The file containing the image data.
         :return: A numpy.ndarray of shape <1, 28, 28, 1>
         """
-        return read_one_image_from_file(filename, MNISTGraph.IMAGE_SIZE, MNISTGraph.IMAGE_SIZE)
+        return read_one_image_from_file(filename, cls.IMAGE_SIZE, cls.IMAGE_SIZE)
 
     @classmethod
     def read_one_image_from_url(cls, url):
@@ -74,7 +74,7 @@ class MNISTDataSets(DataSets):
         :param url: The URL containing the image data.
         :return: A numpy.ndarray of shape <1, 28, 28, 1>
         """
-        return read_one_image_from_url(url, MNISTGraph.IMAGE_SIZE, MNISTGraph.IMAGE_SIZE)
+        return read_one_image_from_url(url, cls.IMAGE_SIZE, cls.IMAGE_SIZE)
 
     @classmethod
     def read_images_from_file(cls, filename, num_images):
@@ -84,7 +84,7 @@ class MNISTDataSets(DataSets):
         :param num_images: Number of images to read.
         :return: A numpy.ndarray of shape <num_images, 28, 28, 1>
         """
-        return read_images_from_file(filename, MNISTGraph.IMAGE_SIZE, MNISTGraph.IMAGE_SIZE, num_images)
+        return read_images_from_file(filename, cls.IMAGE_SIZE, cls.IMAGE_SIZE, num_images)
 
     @classmethod
     def read_images_from_url(cls, url, num_images):
@@ -94,7 +94,7 @@ class MNISTDataSets(DataSets):
         :param num_images: Number of images to read.
         :return: A numpy.ndarray of shape <num_images, 28, 28, 1>
         """
-        return read_images_from_url(url, MNISTGraph.IMAGE_SIZE, MNISTGraph.IMAGE_SIZE, num_images)
+        return read_images_from_url(url, cls.IMAGE_SIZE, cls.IMAGE_SIZE, num_images)
 
     @classmethod
     def read_images_from_files(cls, *filenames):
@@ -103,7 +103,7 @@ class MNISTDataSets(DataSets):
         :param filenames: The files containing the image data.
         :return: A numpy.ndarray of shape <num_images, 28, 28, 1>
         """
-        return read_images_from_files(MNISTGraph.IMAGE_SIZE, MNISTGraph.IMAGE_SIZE, 1, *filenames)
+        return read_images_from_files(cls.IMAGE_SIZE, cls.IMAGE_SIZE, 1, *filenames)
 
     @classmethod
     def read_images_from_urls(cls, *urls):
@@ -112,7 +112,7 @@ class MNISTDataSets(DataSets):
         :param urls: The URLs containing the image data.
         :return: A numpy.ndarray of shape <num_images, 28, 28, 1>
         """
-        return read_images_from_urls(MNISTGraph.IMAGE_SIZE, MNISTGraph.IMAGE_SIZE, 1, *urls)
+        return read_images_from_urls(cls.IMAGE_SIZE, cls.IMAGE_SIZE, 1, *urls)
 
     ############################################################################
 

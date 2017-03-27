@@ -1,20 +1,45 @@
 from os import walk
-from PIL import Image
+from os.path import isfile
+from subprocess import call
+from pickle import dump, load
+from gzip import open as gzopen
 
+from PIL import Image
 import numpy
 
 from .data_sets import DataSets
-from data_sets.images_labels_data_set import ImagesLabelsDataSet
+from .images_labels_data_set import ImagesLabelsDataSet
 
 __author__ = 'Lene Preuss <lene.preuss@gmail.com>'
 
 """DataSets for RGB images read from files using the directory name as label."""
 
+IMAGENET_SIZE = 299
+
 
 class ImageFileDataSets(DataSets):
-
     """Data sets (training, validation and test data) containing RGB image files."""
+
     DEFAULT_VALIDATION_SHARE = 0.2
+    depth = 3
+
+    @classmethod
+    def get_data(cls, data_file=None, image_directory=None, image_size=IMAGENET_SIZE):
+        if isfile(data_file):
+            print('Loading ' + data_file)
+            with gzopen(data_file, 'rb') as file:
+                return load(file)
+        else:
+            data = ImageFileDataSets(image_directory, image_size, image_size, 0, True)
+            try:
+                with gzopen(data_file, 'wb') as file:
+                    dump(data, file)
+            except OverflowError:  # annoying python bug when using gzopen with data > 4GB
+                uncompressed_file = '.'.join(data_file.split('.')[:-1])
+                with open(uncompressed_file, 'wb') as file:
+                    dump(data, file)
+                call(('gzip', uncompressed_file))
+            return data
 
     def __init__(self, base_dir, x_size, y_size, validation_share=None, one_hot=False):
         """Construct the data set, locating and if necessarily downloading the MNIST data.
@@ -25,7 +50,7 @@ class ImageFileDataSets(DataSets):
         self.one_hot = one_hot
         self.base_dir = base_dir
         self.size = (x_size, y_size)
-        self.num_features = x_size*y_size*3
+        self.num_features = x_size*y_size*self.depth
 
         all_images, all_labels = self._extract_images(base_dir)
 
@@ -43,9 +68,9 @@ class ImageFileDataSets(DataSets):
         train_labels = train_labels[self.validation_size:]
 
         super().__init__(
-            ImagesLabelsDataSet(train_images, train_labels, 3),
-            ImagesLabelsDataSet(validation_images, validation_labels, 3),
-            ImagesLabelsDataSet(test_images, test_labels, 3)
+            ImagesLabelsDataSet(train_images, train_labels, self.depth),
+            ImagesLabelsDataSet(validation_images, validation_labels, self.depth),
+            ImagesLabelsDataSet(test_images, test_labels, self.depth)
         )
 
     def get_label(self, number):
@@ -55,6 +80,9 @@ class ImageFileDataSets(DataSets):
             raise KeyError('{} not in {}'.format(number, self.numbers_to_labels))
 
     ############################################################################
+
+    def _extract_image_from_url(self, url, labels):
+        pass
 
     def _extract_images(self, base_dir):
         """Extract the images into a 4D uint8 numpy array [index, y, x, depth]."""
