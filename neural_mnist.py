@@ -6,6 +6,23 @@ from os.path import isfile
 
 from data_sets.mnist_data_sets import MNISTDataSets
 
+def larger_model():
+        # http://machinelearningmastery.com/handwritten-digit-recognition-using-convolutional-neural-networks-python-keras/
+	# create model
+	model = Sequential()
+	model.add(Convolution2D(30, 5, 5, border_mode='valid', input_shape=(1, 28, 28), activation='relu'))
+	model.add(MaxPooling2D(pool_size=(2, 2)))
+	model.add(Convolution2D(15, 3, 3, activation='relu'))
+	model.add(MaxPooling2D(pool_size=(2, 2)))
+	model.add(Dropout(0.2))
+	model.add(Flatten())
+	model.add(Dense(128, activation='relu'))
+	model.add(Dense(50, activation='relu'))
+	model.add(Dense(num_classes, activation='softmax'))
+	# Compile model
+	model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+	return model
+    
 data = MNISTDataSets('./data', True)
 
 mnist = Sequential([
@@ -13,6 +30,7 @@ mnist = Sequential([
     Dense(data.num_features, input_dim=data.num_features), Activation('relu'),
     Dense(data.num_labels), Activation('softmax'),
 ])
+# https://github.com/fchollet/keras/blob/master/examples/mnist_cnn.py
 # fancy_mnist = Sequential([
 #     Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(28, 28, 1)),
 #     Conv2D(64, (3, 3), activation='relu'),
