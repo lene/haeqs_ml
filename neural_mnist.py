@@ -1,21 +1,45 @@
-from keras.layers import Dense, Activation
 from keras.models import Sequential
+from keras.layers import Dense, Activation
+from keras.layers import Dropout, Flatten, Conv2D, MaxPooling2D
+from keras.optimizers import Adadelta
+from os.path import isfile
 
 from data_sets.mnist_data_sets import MNISTDataSets
 
 data = MNISTDataSets('./data', True)
 
 mnist = Sequential([
-    Dense(32, input_dim=data.num_features), Activation('relu'),
+    # Dense(32, input_dim=data.num_features), Activation('relu'),
+    Dense(data.num_features, input_dim=data.num_features), Activation('relu'),
     Dense(data.num_labels), Activation('softmax'),
 ])
+# fancy_mnist = Sequential([
+#     Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(28, 28, 1)),
+#     Conv2D(64, (3, 3), activation='relu'),
+#     MaxPooling2D(pool_size=(2, 2)),
+#     Dropout(0.25),
+#     Flatten(),
+#     Dense(128, activation='relu'),
+#     Dropout(0.5),
+#     Dense(data.num_labels, activation='softmax')
+# ])
 
 mnist.compile(
     optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy']
 )
+# fancy_mnist.compile(
+#     optimizer=Adadelta(), loss='categorical_crossentropy', metrics=['accuracy']
+# )
+if isfile('mnist.hdf5'):
+    mnist.load_weights('mnist.hdf5')
+else:
+    mnist.fit(data.train.input, data.train.labels)
+    # fancy_mnist.fit(data.train.input.reshape(data.train.input.shape[0], 28, 28, 1), data.train.labels)
+    mnist.save_weights('mnist.hdf5')
 
-mnist.fit(data.train.input, data.train.labels)
-
+loss_and_metrics = mnist.evaluate(data.test.input, data.test.labels)
+print()
+print('test set loss:', loss_and_metrics[0], 'test set accuracy:', loss_and_metrics[1])
 
 def show_image(grayscale_values):
     import matplotlib.pyplot as plt
