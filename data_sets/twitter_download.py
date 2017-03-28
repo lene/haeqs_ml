@@ -1,9 +1,16 @@
-"""Just some example code for getting images via the twitter API"""
+"""
+Downloading images via the Twitter API
+
+for docs how to generate your own authentication file, see:
+https://python-twitter.readthedocs.io/en/latest/getting_started.html
+
+"""
+from urllib.error import HTTPError
 
 import twitter
 import json
 
-from os.path import join
+from os.path import join, isfile
 from os import makedirs
 
 from PIL import Image
@@ -15,54 +22,70 @@ TWITTER_ACCOUNTS = [
 ]
 
 
-def to_date(created_at):
-    import dateutil.parser
-    return "{:%Y-%m-%d}".format(dateutil.parser.parse(created_at))
+class TwitterDownloader:
 
+    def __init__(self, api, account, max_images=MAX_IMAGES):
+        self.api = self._resolve_twitter_api(api)
+        self.account = account
+        self.max_images = max_images
+        self.image_urls = set()
+        self.download_root = join('.', 'data', 'twitter')
 
-def crawl_twitter_account(twitter_api, twitter_account):
-    image_urls = set()
-    search_results = twitter_api.GetUserTimeline(
-        screen_name=twitter_account, count=200, include_rts=False, exclude_replies=True
-    )
-    while len(image_urls) < MAX_IMAGES and search_results:
-        oldest_date = json.loads(search_results[-1].AsJsonString())['created_at']
-        max_id = json.loads(search_results[-1].AsJsonString())['id']
-        for post in search_results:
-            try:
-                for media in json.loads(post.AsJsonString())['media']:
-                    image_url = media['media_url']
-                    if image_url[-4:] in ('.jpg', '.png'):
-                        image_urls.add(image_url)
-            except (IndexError, KeyError):
-                continue
-
-        search_results = twitter_api.GetUserTimeline(
-            screen_name=twitter_account, count=200, include_rts=False, exclude_replies=True,
-            max_id=max_id-1
+    def get_images(self, download=False):
+        search_results = self.api.GetUserTimeline(
+            screen_name=self.account, count=200, include_rts=False, exclude_replies=True
         )
-        print(max_id, oldest_date)
+        while len(self.image_urls) < self.max_images and search_results:
+            max_id = json.loads(search_results[-1].AsJsonString())['id']
+            for post in search_results:
+                try:
+                    self.add_images_in_post(post, download)
+                except (IndexError, KeyError):
+                    continue
 
-    return image_urls
+            search_results = self.api.GetUserTimeline(
+                screen_name=self.account, count=200, include_rts=False, exclude_replies=True,
+                max_id=max_id-1
+            )
 
-# for docs how to generate your own authentication file, see:
-# https://python-twitter.readthedocs.io/en/latest/getting_started.html
-with open('twitter_auth.json', 'r') as auth_file:
-    auth = json.load(auth_file)
+        return list(self.image_urls)[:self.max_images]
 
-api = twitter.api.Api(**auth, sleep_on_rate_limit=True)
+    def add_images_in_post(self, post, download=False):
+        for media in json.loads(post.AsJsonString())['media']:
+            image_url = media['media_url']
+            if image_url[-4:] in ('.jpg', '.png'):
+                try:
+                    if download:
+                        self.download_image(image_url)
+                    self.image_urls.add(image_url)
+                except HTTPError:
+                    pass
 
-image_urls = {account: crawl_twitter_account(api, account) for account in TWITTER_ACCOUNTS}
+    def download_image(self, url):
+        makedirs(join(self.download_root, self.account), exist_ok=True)
+        filename = join(self.download_root, self.account, url.split('/')[-1])
+        if not isfile(filename):
+            urlretrieve(url, filename)
+        with Image.open(filename) as image:
+            # image.show()
+            print(filename, image.size)
 
-from pprint import pprint
-pprint({k: len(v) for k, v in image_urls.items()})
+    @staticmethod
+    def _resolve_twitter_api(api):
+        if isfile(api):
+            with open(api, 'r') as auth_file:
+                auth = json.load(auth_file)
+            api = twitter.api.Api(**auth, sleep_on_rate_limit=True)
+        if not isinstance(api, twitter.Api):
+            raise ValueError(
+                'api parameter must either be a file with authorization parameters or an instantiated twitter API'
+            )
+        if not api.VerifyCredentials():
+            raise ValueError('Twitter API credentials not valid')
+        return api
 
-account = 'ravenmaster1'
-for url in image_urls[account]:
-    makedirs(join('data', 'twitter', account), exist_ok=True)
-    filename = join('data', 'twitter', account, url.split('/')[-1])
-    urlretrieve(url, filename)
-    image = Image.open(filename)
-    # image.show()
-    print(filename, image.size)
 
+image_urls = {
+    account: TwitterDownloader('twitter_auth.json', account).get_images(True)
+    for account in TWITTER_ACCOUNTS
+}
