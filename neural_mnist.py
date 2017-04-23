@@ -40,6 +40,7 @@ def even_fancier_mnist():
 
 def show_image(grayscale_values):
     import matplotlib.pyplot as plt
+    plt.switch_backend('TkAgg')
     plt.imshow(to_image_data(grayscale_values), cmap='gray')
     plt.show()
 
@@ -79,10 +80,10 @@ print('test set loss:', loss_and_metrics[0], 'test set accuracy:', loss_and_metr
 
 
 for i in range(0, 10):
-    show_image(data.test.input[i])
-
     actual = data.test.labels[i]
     print('actual:', maxindex(actual), actual)
+
+    show_image(data.test.input[i])
 
     prediction = mnist.predict(data.test.input[i:i + 1])[0]
     print('predicted:', maxindex(prediction), nth_index_and_value(prediction, 1), 'runner up:', nth_index_and_value(prediction, 2))
