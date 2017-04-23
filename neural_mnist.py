@@ -1,13 +1,25 @@
 from keras.models import Sequential
 from keras.layers import Dense, Activation
-from keras.layers import Dropout, Flatten, Conv2D, MaxPooling2D
-from keras.optimizers import Adadelta
-from os.path import isfile
 
 from data_sets.mnist_data_sets import MNISTDataSets
 
 
+def very_simple_mnist():
+    return Sequential([
+        Dense(32, input_dim=data.num_features), Activation('relu'),
+        Dense(data.num_labels), Activation('softmax'),
+    ])
+
+
+def simple_mnist():
+    return Sequential([
+        Dense(data.num_features, input_dim=data.num_features), Activation('relu'),
+        Dense(data.num_labels), Activation('softmax'),
+    ])
+
+
 def fancy_mnist():
+    from keras.layers import Dropout, Flatten, Conv2D, MaxPooling2D
     # https://github.com/fchollet/keras/blob/master/examples/mnist_cnn.py
     return Sequential([
         Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(28, 28, 1)),
@@ -22,6 +34,7 @@ def fancy_mnist():
 
 
 def even_fancier_mnist():
+    from keras.layers import Dropout, Flatten, Conv2D, MaxPooling2D
     # http://machinelearningmastery.com/handwritten-digit-recognition-using-convolutional-neural-networks-python-keras/
     model = Sequential()
     model.add(Conv2D(30, 5, 5, border_mode='valid', input_shape=(1, 28, 28), activation='relu'))
@@ -62,17 +75,13 @@ def nth_index_and_value(l, n):
 
 data = MNISTDataSets('./data', True)
 
-mnist = Sequential([
-    # Dense(32, input_dim=data.num_features), Activation('relu'),
-    Dense(data.num_features, input_dim=data.num_features), Activation('relu'),
-    Dense(data.num_labels), Activation('softmax'),
-])
+mnist = very_simple_mnist()
 
 mnist.compile(
     optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy']
 )
 
-mnist.fit(data.train.input, data.train.labels, epochs=2)
+mnist.fit(data.train.input, data.train.labels, epochs=10)
 
 loss_and_metrics = mnist.evaluate(data.test.input, data.test.labels)
 print()
