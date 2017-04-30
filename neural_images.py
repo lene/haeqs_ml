@@ -27,7 +27,10 @@ def show_demo(num_demo_images):
         else:
             image_index = i
 
-        show_image(data.test.input[image_index], 3)
+        try:
+            show_image(data.test.input[image_index], 3)
+        except Exception as e:
+            print(str(e))
 
         actual = data.test.labels[image_index]
         print('actual:', maxindex(actual), data.get_label(maxindex(actual)))

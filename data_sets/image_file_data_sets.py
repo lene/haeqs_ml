@@ -117,6 +117,7 @@ class ImageFileDataSets(DataSets):
     @staticmethod
     def show_image(rgb_values, label=''):
         import matplotlib.pyplot as plt
+        plt.switch_backend('TkAgg')
         plt.imshow(rgb_values, cmap='gray')
         plt.title(label)
         plt.show()
