@@ -33,7 +33,7 @@ class ImageFileDataSets(DataSets):
             data = ImageFileDataSets(image_directory, image_size, image_size, 0, True)
             try:
                 with gzopen(data_file, 'wb') as file:
-                    dump(data, file)
+                    dump(data, file, protocol=HIGHEST_PROTOCOL)
             except OverflowError:  # annoying python bug when using gzopen with data > 4GB
                 uncompressed_file = '.'.join(data_file.split('.')[:-1])
                 with open(uncompressed_file, 'wb') as file:

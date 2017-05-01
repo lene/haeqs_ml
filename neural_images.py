@@ -84,6 +84,9 @@ def parse_args():
         '--random-demo-images', action='store_true',
         help='Select random images from the test set for demo.'
     )
+    parser.add_argument(
+        '--predict-folder', help='Folder containing images to run prediction on'
+    )
     return parser.parse_args()
 
 args = parse_args()
@@ -113,3 +116,62 @@ if args.run_test:
 
 if args.num_demo_images:
     show_demo(args.num_demo_images)
+
+
+def downscale(image, size):
+        w, h = image.size
+        if w > h:
+            image = image.crop(((w-h)/2, 0, w-(w-h)/2, h))
+        elif h > w:
+            image = image.crop((0, 0, w, w))
+        return image.resize(size, Image.BICUBIC)
+
+
+def normalize(ndarray):
+    """Transform a ndarray that contains uint8 values to floats between 0. and 1.
+
+    :param ndarray:
+    :return:
+    """
+    assert isinstance(ndarray, numpy.ndarray)
+    assert ndarray.dtype == numpy.uint8
+
+    return numpy.multiply(ndarray.astype(numpy.float32), 1.0/255.0)
+
+
+if args.predict_folder:
+    from os import walk
+    from os.path import join, basename
+    from PIL import Image
+    import numpy
+    images = []
+    filenames = {}
+    all_dirs = list(walk(args.predict_folder))
+    index = 0
+    for root, dirs, files in all_dirs:
+        for file in files:
+            try:
+                image = Image.open(join(root, file)).convert('RGB')
+            except OSError:
+                continue
+            print(file)
+            image_data = numpy.asarray(downscale(image, (args.image_size, args.image_size)))
+            images.append(image_data)
+            filenames[index] = (basename(root), file)
+            index += 1
+
+
+    images = numpy.asarray(images)
+    images = normalize(images)
+
+    for image_index in range(len(images)):
+        input = images[image_index:image_index + 1].reshape(
+            1, args.image_size, args.image_size, 3
+        )
+        show_image(input, 3)
+
+        for prediction in model.predict(input):
+            print(filenames[image_index])
+            print('predicted:', *data.prediction_info(prediction, 1))
+            print('runner up:', *data.prediction_info(prediction, 2))
+
