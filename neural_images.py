@@ -144,34 +144,23 @@ if args.predict_folder:
     from os.path import join, basename
     from PIL import Image
     import numpy
-    images = []
-    filenames = {}
-    all_dirs = list(walk(args.predict_folder))
-    index = 0
-    for root, dirs, files in all_dirs:
+    images, filenames = [], []
+    for root, _, files in list(walk(args.predict_folder)):
         for file in files:
             try:
                 image = Image.open(join(root, file)).convert('RGB')
             except OSError:
                 continue
-            print(file)
-            image_data = numpy.asarray(downscale(image, (args.image_size, args.image_size)))
-            images.append(image_data)
-            filenames[index] = (basename(root), file)
-            index += 1
 
+            images.append(numpy.asarray(downscale(image, (args.image_size, args.image_size))))
+            filenames.append((basename(root), file))
 
-    images = numpy.asarray(images)
-    images = normalize(images)
+    images = normalize(numpy.asarray(images))
 
-    for image_index in range(len(images)):
-        input = images[image_index:image_index + 1].reshape(
-            1, args.image_size, args.image_size, 3
-        )
-        show_image(input, 3)
-
-        for prediction in model.predict(input):
+    for image_index, prediction in enumerate(model.predict(images)):
             print(filenames[image_index])
             print('predicted:', *data.prediction_info(prediction, 1))
             print('runner up:', *data.prediction_info(prediction, 2))
+            # show_image(images[image_index], 3)
+            print()
 
