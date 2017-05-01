@@ -1,7 +1,7 @@
 from os import walk
 from os.path import isfile
 from subprocess import call
-from pickle import dump, load
+from pickle import dump, load, HIGHEST_PROTOCOL
 from gzip import open as gzopen
 
 from PIL import Image
@@ -37,7 +37,7 @@ class ImageFileDataSets(DataSets):
             except OverflowError:  # annoying python bug when using gzopen with data > 4GB
                 uncompressed_file = '.'.join(data_file.split('.')[:-1])
                 with open(uncompressed_file, 'wb') as file:
-                    dump(data, file)
+                    dump(data, file, protocol=HIGHEST_PROTOCOL)
                 call(('gzip', uncompressed_file))
             return data
 
