@@ -62,13 +62,21 @@ class TwitterDownloader:
                     pass
 
     def download_image(self, url):
+        from urllib.error import URLError
+        from os import remove
         makedirs(join(self.download_root, self.account), exist_ok=True)
         filename = join(self.download_root, self.account, url.split('/')[-1])
-        if not isfile(filename):
-            urlretrieve(url, filename)
-        with Image.open(filename) as image:
-            # image.show()
-            print(filename, image.size)
+        try:
+            if not isfile(filename):
+                urlretrieve(url, filename)
+            with Image.open(filename) as image:
+                # image.show()
+                print(filename, image.size)
+        except (URLError, ConnectionResetError, OSError):
+            try:
+                remove(filename)
+            except FileNotFoundError:
+                pass
 
     @staticmethod
     def _resolve_twitter_api(api):
