@@ -7,12 +7,11 @@ import sys
 # pip install matplotlib
 import matplotlib.pyplot as plt
 
-x = [1, 2, 3, 4, 5]  # example values for x
-y = [1, 3, 3, 2, 5]  # example values
+X = [1, 2, 3, 4, 5]  # example values for x
+Y = [1, 3, 3, 2, 5]  # example values
 
-plt.plot(y, 'ro')
-plt.show()
-sys.exit()
+plt.plot(Y, 'ro')
+# plt.show()
 
 
 def mean(numbers):
@@ -34,10 +33,9 @@ def coefficients(x, y):
     return b0, b1
 
 
-coeffs = coefficients(x, y)
+coeffs = coefficients(X, Y)
 print()
 print("Coefficients: {}\ny = {}*x + {}".format(coeffs, coeffs[0], coeffs[1]))
-
 
 def prediction(training_x, training_y, x):
     b0, b1 = coefficients(training_x, training_y)
@@ -45,15 +43,15 @@ def prediction(training_x, training_y, x):
 
 
 print()
-print("Prediction for x = 1: {}".format(prediction(x, y, 1)))
-print("Actual value for x = 1: {}".format(y[0]))
-print("Prediction for x = 2: {}".format(prediction(x, y, 2)))
-print("Actual value for x = 2: {}".format(y[1]))
+print("Prediction for x = 1: {}".format(prediction(X, Y, 1)))
+print("Actual value for x = 1: {}".format(Y[0]))
+print("Prediction for x = 2: {}".format(prediction(X, Y, 2)))
+print("Actual value for x = 2: {}".format(Y[1]))
 # ...
-print("Prediction for x = 5: {}".format(prediction(x, y, 5)))
-print("Actual value for x = 5: {}".format(y[4]))
+print("Prediction for x = 5: {}".format(prediction(X, Y, 5)))
+print("Actual value for x = 5: {}".format(Y[4]))
 
-plt.plot([prediction(x, y, xx) for xx in range(1, 6)])
+plt.plot([prediction(X, Y, xx) for xx in range(1, 6)])
 # plt.show()
 
 
@@ -83,10 +81,10 @@ def evaluate_algorithm(dataset, algorithm):
     return rmse(actual, predicted)
 
 
-predicted, test_set = test_on_test_set(simple_linear_regression, (x, y))
+predicted, test_set = test_on_test_set(simple_linear_regression, (X, Y))
 print()
 print("Values:", test_set, "Prediction:", predicted)
-print("Error:", evaluate_algorithm((x, y), simple_linear_regression))
+print("Error:", evaluate_algorithm((X, Y), simple_linear_regression))
 
 
 def load_csv(filename):
@@ -105,14 +103,13 @@ def load_csv(filename):
             y.append(float(row[1]))
     return x, y
 
-x, y = load_csv('Demographic_Statistics_By_Zip_Code.csv')
-print(x, y)
+X, Y = load_csv('Demographic_Statistics_By_Zip_Code.csv')
+print(X, Y)
 plt.clf()
-plt.plot(x, y, 'ro')
-# plt.show()
-coeffs = coefficients(x, y)
+plt.plot(X, Y, 'ro')
+coeffs = coefficients(X, Y)
 print("Coefficients: {}\ny = {}*x + {}".format(coeffs, coeffs[0], coeffs[1]))
-print("Error:", evaluate_algorithm((x, y), simple_linear_regression))
+print("Error:", evaluate_algorithm((X, Y), simple_linear_regression))
 
-plt.plot([prediction(x, y, xx) for xx in range(0, 250)])
-# plt.show()
+plt.plot([prediction(X, Y, xx) for xx in range(0, 250)])
+plt.show()

@@ -1,7 +1,7 @@
 from os import walk
 from os.path import isfile
 from subprocess import call
-from pickle import dump, load
+from pickle import dump, load, HIGHEST_PROTOCOL
 from gzip import open as gzopen
 
 from PIL import Image
@@ -33,11 +33,11 @@ class ImageFileDataSets(DataSets):
             data = ImageFileDataSets(image_directory, image_size, image_size, 0, True)
             try:
                 with gzopen(data_file, 'wb') as file:
-                    dump(data, file)
+                    dump(data, file, protocol=HIGHEST_PROTOCOL)
             except OverflowError:  # annoying python bug when using gzopen with data > 4GB
                 uncompressed_file = '.'.join(data_file.split('.')[:-1])
                 with open(uncompressed_file, 'wb') as file:
-                    dump(data, file)
+                    dump(data, file, protocol=HIGHEST_PROTOCOL)
                 call(('gzip', uncompressed_file))
             return data
 
@@ -117,6 +117,7 @@ class ImageFileDataSets(DataSets):
     @staticmethod
     def show_image(rgb_values, label=''):
         import matplotlib.pyplot as plt
+        plt.switch_backend('TkAgg')
         plt.imshow(rgb_values, cmap='gray')
         plt.title(label)
         plt.show()
