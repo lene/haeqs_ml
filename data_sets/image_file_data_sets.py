@@ -25,14 +25,15 @@ class ImageFileDataSets(DataSets):
 
     @classmethod
     def get_data(cls, data_file=None, image_directory=None, image_size=IMAGENET_SIZE):
+                
         if isfile(data_file):
             print('Loading ' + data_file)
-            with gzopen(data_file, 'rb') as file:
+            with open(data_file, 'rb') as file:
                 return load(file)
         else:
             data = ImageFileDataSets(image_directory, image_size, image_size, 0, True)
             try:
-                with gzopen(data_file, 'wb') as file:
+                with open(data_file, 'wb') as file:
                     dump(data, file)
             except OverflowError:  # annoying python bug when using gzopen with data > 4GB
                 uncompressed_file = '.'.join(data_file.split('.')[:-1])
