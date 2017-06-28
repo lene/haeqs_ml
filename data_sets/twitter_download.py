@@ -1,10 +1,11 @@
 """
 Downloading images via the Twitter API
 
-For docs how to generate your own authentication file, see:
+for docs how to generate your own authentication file, see:
 https://python-twitter.readthedocs.io/en/latest/getting_started.html
 
 """
+from urllib.error import HTTPError
 
 import twitter
 import json
@@ -14,23 +15,14 @@ from os import makedirs
 
 from PIL import Image
 from urllib.request import urlretrieve
-from urllib.error import HTTPError
 
-# TODO: read from command line
 MAX_IMAGES = 540
-# TODO: read from command line
 TWITTER_ACCOUNTS = [
     'hourlyfox', 'Bodegacats_', 'BirdPerHour', 'ravenmaster1', 'HourlyPinguins', 'HourlyPanda'
 ]
 
 
 class TwitterDownloader:
-    """
-    Download all image files up to a specified limit from a twitter account.
-    TODO: specify a search instead of an account
-    TODO: only really download up to max_images
-    TODO: make download root configurable
-    """
 
     def __init__(self, api, account, max_images=MAX_IMAGES):
         self.api = self._resolve_twitter_api(api)
@@ -70,14 +62,21 @@ class TwitterDownloader:
                     pass
 
     def download_image(self, url):
+        from urllib.error import URLError
+        from os import remove
         makedirs(join(self.download_root, self.account), exist_ok=True)
         filename = join(self.download_root, self.account, url.split('/')[-1])
-        if not isfile(filename):
-            urlretrieve(url, filename)
-        # for debugging/following the status, mostly
-        with Image.open(filename) as image:
-            # image.show()
-            print(filename, image.size)
+        try:
+            if not isfile(filename):
+                urlretrieve(url, filename)
+            with Image.open(filename) as image:
+                # image.show()
+                print(filename, image.size)
+        except (URLError, ConnectionResetError, OSError):
+            try:
+                remove(filename)
+            except FileNotFoundError:
+                pass
 
     @staticmethod
     def _resolve_twitter_api(api):
@@ -90,7 +89,7 @@ class TwitterDownloader:
                 'api parameter must either be a file with authorization parameters or an instantiated twitter API'
             )
         if not api.VerifyCredentials():
-            raise PermissionError('Twitter API credentials not valid')
+            raise ValueError('Twitter API credentials not valid')
         return api
 
 
